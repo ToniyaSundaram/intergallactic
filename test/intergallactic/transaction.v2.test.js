@@ -1,222 +1,106 @@
-'use strict';
+"use strict";
 
-var glOrWd = (typeof window !== 'undefined' ? window : global);
-var Intergallactic = glOrWd.Intergallactic;
-var expect = glOrWd.expect;
-let txnTd = (typeof window !== 'undefined' ? window : require('./transaction.td'))._txnTd;
+var Intergallactic =
+  typeof window !== "undefined"
+    ? window.Intergallactic
+    : require("../../index");
+var chai = typeof window !== "undefined" ? window : require("chai");
+var expect = chai.expect;
+var assert = chai.assert;
+var tnet = "http://127.0.0.1:1337/rpc";
 
-before('instantiate Intergallactic', () => {
-  new Intergallactic({ url: glOrWd.tnet, protocol: 'jsonrpc' });
+const testAcc = {
+    Private_key:
+      "skMrJDE3ZwD8KEMjF5APLW9615GhRNizLxkW5JQAnCFkKRZ5yamjXWQHSYng7kYTBM2dpQfcF1qiuCSgd7ZfRXm8H9T5rhM",
+    Public_key: "pkkvZ4zgyre2b3LKjWJET44zC9CDrnB1nc4bVrUhjTghFAzGRob",
+    Account_address: "acCxzUX83Aqg45ZiVDmhoYjozPyfBG1zhtQ",
+    Validator_address: "vaFgxF2yCa3HfkzyofCK39bA9mm9yKZU61e"
+  },
+  testAcc1 = {
+    Private_key:
+      "skeAH9ww5BtpVGtWz16CvgAFAimzQH8LUjkyhoF1oKajDqoSDXbGjaupEnBSAf6BBgmusazkP7bHnuvRwxqb8F1eWCP36Aa",
+    Public_key: "pkjLErBkGHHf2Ymd2JcgeQsLkstYnBfPaiMZVPogzSFx5YW6zpp",
+    Account_address: "acHMzy386dCc9ytkw4RRBvb8bSxAn5Y73hW",
+    Validator_address: "vaL5xjYyG2QDmfL2FVr2RXSUkpjfa8o3W4n"
+  };
+
+describe("Intergallactic Transactions", function() {
+  let igc;
+
+  before("instantiate intergallactic", function() {
+    igc = new Intergallactic({ url: tnet, protocol: "jsonrpc" });
+  });
+
+  it('"send" should send the transaction', async function() {
+    let to = testAcc1.Account_address;
+    let amount = 3;
+    let private_key = testAcc.Private_key;
+
+    let newTxn = new igc.Send();
+    let res = await newTxn.send(to, amount, private_key);
+    
+  });
+
+  it("Should complete bond transaction", async function() {
+    let publicKey = testAcc.Public_key;
+    let amount = 3;
+    let privKey =
+      testAcc.Private_key;
+    let newTxn = new igc.Bond();
+    let res = await newTxn.bond(publicKey, amount, privKey);
+    console.log("res", res);
+  });
+
+  it("Should complete unbond transaction", async function() {
+    let to = "acB8phfvWuZ2Wtantp1fuP6nv34y7d6Ekko";
+    let amount = 3;
+    let privKey =
+      "skMrJDE3ZwD8KEMjF5APLW9615GhRNizLxkW5JQAnCFkKRZ5yamjXWQHSYng7kYTBM2dpQfcF1qiuCSgd7ZfRXm8H9T5rhM";
+    let newTxn = new igc.Unbond();
+    let res = await newTxn.unbond(to, amount, privKey);
+    console.log("res", res);
+  });
+
+  it("Should give persmission to an account", async function() {
+    let address = "acULkay8JdUeYo2NbJpMYTKkXTrUas8XTtm";
+    let perm_value = "0x1ff";
+    let privKey =
+      "skMrJDE3ZwD8KEMjF5APLW9615GhRNizLxkW5JQAnCFkKRZ5yamjXWQHSYng7kYTBM2dpQfcF1qiuCSgd7ZfRXm8H9T5rhM";
+    let newTxn = new igc.Permission();
+    let res = await newTxn.permission(address, perm_value, privKey);
+    console.log("res", res);
+  });
+
+  it.only("Should deploy a contract", async function() {
+    let toAddress = "";
+    let amount = 0;
+    let data = "0xf34";
+    let gasLimit = 1;
+    let privKey =
+      "skMrJDE3ZwD8KEMjF5APLW9615GhRNizLxkW5JQAnCFkKRZ5yamjXWQHSYng7kYTBM2dpQfcF1qiuCSgd7ZfRXm8H9T5rhM";
+
+    let newTxn = new igc.Call();
+    let res = await newTxn.call(toAddress, amount, data, gasLimit, privKey);
+    console.log("res", res);
+  });
+
+  //   describe("Tests for Offline Transaction", async function() {
+  //     let newTxn;
+  //     before("Should instantiate Transaction", function() {
+  //       newTxn = new igc.Transaction();
+  //     });
+
+  //     it.only("Should have a signTransaction function upon instantiate", function() {
+  //       expect(newTxn.signTransaction).to.be.a("function");
+  //     });
+
+  //     it.only("Should have a broadcast function upon instantiate", function() {
+  //       expect(newTxn.broadcast).to.be.a("function");
+  //     });
+
+  //     it('Should signTransaction and return transaction object', async function() {
+  //         await newTxn.signTransaction(testAcc.privKey)
+  //     })
+  //   });
+ 
 });
-
-describe('Intergallactic.Transaction Positive Scenario', () => {
-  const igc = new Intergallactic({ url: glOrWd.tnet, protocol: 'jsonrpc' });
-  const newTxn = new igc.TransactionV2({ to: 'aaa', amount: 100 });
-
-  it('should have "sign" function upon instantiate', () => {
-    expect(newTxn.sign).to.be.a('function');
-  });
-
-  it('should have "send" function upon instantiate', () => {
-    expect(newTxn.send).to.be.a('function');
-  });
-
-  it('should have "call" function upon instantiate', () => {
-    expect(newTxn.call).to.be.a('function');
-  });
-
-  it('should have "bond" function upon instantiate', () => {
-    expect(newTxn.bond).to.be.a('function');
-  });
-
-  it('should have "unbond" function upon instantiate', () => {
-    expect(newTxn.unbond).to.be.a('function');
-  });
-
-  it('should have "permission" function upon instantiate', () => {
-    expect(newTxn.permission).to.be.a('function');
-  });
-
-  it('"sign", should be able to sign the transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const txn = new igc.TransactionV2(data.txn);
-        return txn.sign(data.pvK);
-      },
-      validate: (res) => {
-
-      }
-    };
-    test.data = txnTd.sign.ok;
-    glOrWd.runTest(test, done);
-  });
-
-  it('"signSync", should be able to sign the transaction synchoronously', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.signSync(data.pvK);
-      },
-      validate: (res) => {
-
-      }
-    };
-    test.data = txnTd.signSync.ok;
-    glOrWd.runTest(test, done);
-  });
-
-  it('"broadcast", should be able to broadcast transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.sign(data.pvK)
-          .then(() => {
-            return newTxn.broadcast();
-          })
-      },
-      validate: (res) => {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.error).to.equal(undefined);
-        expect(res.body.result).to.be.an('object');
-        expect(res.body.result.TxHash).to.be.a('string');
-        expect(res.body.result.TxHash.length).to.equal(28);
-      }
-    };
-    test.data = txnTd.broadcast.ok;
-    glOrWd.runTest(test, done);
-  });
-
-  it('"send", should be able to broadcast "SEND" transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.send(data.pvK)
-      },
-      validate: (res) => {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.error).to.equal(undefined);
-        expect(res.body.result).to.be.an('object');
-        expect(res.body.result.TxHash).to.be.a('string');
-        expect(res.body.result.TxHash.length).to.equal(28);
-      }
-    };
-
-    this.timeout(10000);
-    test.data = txnTd.send.ok;
-    setTimeout(function () { glOrWd.runTest(test, done) }, 2000);
-  });
-
-  it.skip('"call", be able to broadcast "CALL" transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.call(data.pvK)
-      },
-      validate: (res) => {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.error).to.equal(undefined);
-        expect(res.body.result).to.be.an('object');
-        expect(res.body.result.TxHash).to.be.a('string');
-        expect(res.body.result.TxHash.length).to.equal(28);
-      }
-    };
-
-    this.timeout(10000);
-    test.data = txnTd.call.ok;
-    setTimeout(function () { glOrWd.runTest(test, done) }, 2000);
-  });
-
-  it('"bond", be able to broadcast "BOND" transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.bond(data.pvK)
-      },
-      validate: (res) => {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.error).to.equal(undefined);
-        expect(res.body.result).to.be.an('object');
-        expect(res.body.result.TxHash).to.be.a('string');
-        expect(res.body.result.TxHash.length).to.equal(28);
-      }
-    };
-
-    this.timeout(10000);
-    test.data = txnTd.bond.ok;
-    setTimeout(function () { glOrWd.runTest(test, done) }, 2000);
-  });
-
-  it('"unbond", be able to broadcast "UNBOND" transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.unbond(data.pvK)
-      },
-      validate: (res) => {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.error).to.equal(undefined);
-        expect(res.body.result).to.be.an('object');
-        expect(res.body.result.TxHash).to.be.a('string');
-        expect(res.body.result.TxHash.length).to.equal(28);
-      }
-    };
-
-    this.timeout(10000);
-    test.data = txnTd.unbond.ok;
-    setTimeout(function () { glOrWd.runTest(test, done) }, 2000);
-  });
-
-  it('"permission", be able to broadcast "PERMISSION" transaction', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        return newTxn.permission(data.pvK)
-      },
-      validate: (res) => {
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.error).to.equal(undefined);
-        expect(res.body.result).to.be.an('object');
-        expect(res.body.result.TxHash).to.be.a('string');
-        expect(res.body.result.TxHash.length).to.equal(28);
-      }
-    };
-
-    this.timeout(10000);
-    test.data = txnTd.permission.ok;
-    setTimeout(function () { glOrWd.runTest(test, done) }, 2000);
-  });
-});
-
-describe('Intergallactic.TransactionV2 Negative Scenario', function () {
-  const igc = new Intergallactic({ url: glOrWd.tnet, protocol: 'jsonrpc' });
-
-  it('multiple "sign", should not throw error', function (done) {
-    const test = {
-      function: (data) => {
-        const txn = new igc.TransactionV2(data.txn);
-        return txn.sign(data.pvK)
-          .then(() => { return txn.sign(data.pvK) });
-      },
-      validate: (res) => {
-
-      }
-    };
-    test.data = txnTd.sign.ok;
-    glOrWd.runTest(test, done);
-  });
-
-  it('multiple "signSync", should not throw error', function (done) {
-    const test = {
-      function: (data) => {
-        const newTxn = new igc.TransactionV2(data.txn);
-        newTxn.signSync(data.pvK);
-        return newTxn.signSync(data.pvK);
-      },
-      validate: (res) => {
-
-      }
-    };
-    test.data = txnTd.signSync.ok;
-    glOrWd.runTest(test, done);
-  });
-})

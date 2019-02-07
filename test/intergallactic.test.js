@@ -6,6 +6,7 @@ var chai = typeof window !== 'undefined' ? window : require('chai');
 var glOrWd = (typeof window !== 'undefined' ? window : global);
 
 glOrWd.expect = chai.expect;
+glOrWd.assert = chai.assert;
 glOrWd.tnet = 'http://127.0.0.1:1337/rpc';
 glOrWd.Intergallactic = Intergallactic;
 glOrWd.BigNumber = BigNumber;

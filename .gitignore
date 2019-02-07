@@ -65,3 +65,4 @@ dist/
 package-lock.json
 
 .vscode/
+.DS_Store
